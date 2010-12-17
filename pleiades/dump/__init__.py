@@ -17,6 +17,7 @@ timePeriods = {
     'R': (30, 300),
     'L': (300, 640)
     }
+
 class UnicodeWriter:
     """
     A CSV writer which will write rows to CSV file "f",
@@ -84,7 +85,21 @@ names_schema = dict(
     creators=lambda x, y: ', '.join(x.listCreators),
     created=lambda x, y: x.created.HTML4(),
     modified=lambda x, y: x.modified.HTML4(),
-    attested=lambda x, y: x.getNameAttested or x.Title,
+    nameAttested=lambda x, y: x.getNameAttested or x.Title,
+    timePeriods=lambda x, y: ''.join(
+        v[0].upper() for v in getattr(x, 'getTimePeriods', [])),
+    )
+
+locations_schema = dict(
+    id=lambda x, y: x.id,
+    title=lambda x, y: x.Title,
+    description=lambda x, y: x.Description,
+    uid=lambda x, y: x.UID,
+    path=lambda x, y: x.getPath().replace('/plone', ''),
+    creators=lambda x, y: ', '.join(x.listCreators),
+    created=lambda x, y: x.created.HTML4(),
+    modified=lambda x, y: x.modified.HTML4(),
+    geometry=lambda x, y: x.getNameAttested or x.Title,
     timePeriods=lambda x, y: ''.join(
         v[0].upper() for v in getattr(x, 'getTimePeriods', [])),
     )
