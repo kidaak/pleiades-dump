@@ -69,6 +69,15 @@ def getTimePeriods(rec, catalog):
     except:
         return ''
 
+def getGeometry(rec, catalog):
+    geo = None
+    try:
+        geo = rec.zgeo_geometry.copy()
+        geo['relation'] = location_precision(rec, catalog)
+    except:
+        log.warn("Unlocated: %s" % rec.getPath())
+    return dumps(None)
+
 places_schema = dict(
     id=lambda x, y: x.id,
     title=lambda x, y: x.Title,
