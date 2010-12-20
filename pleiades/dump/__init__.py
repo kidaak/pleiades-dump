@@ -76,7 +76,7 @@ def getGeometry(rec, catalog):
         geo['relation'] = location_precision(rec, catalog)
     except:
         log.warn("Unlocated: %s" % rec.getPath())
-    return dumps(None)
+    return dumps(geo)
 
 places_schema = dict(
     id=lambda x, y: x.id,
@@ -114,7 +114,7 @@ locations_schema = dict(
     creators=lambda x, y: ', '.join(x.listCreators),
     created=lambda x, y: x.created.HTML4(),
     modified=lambda x, y: x.modified.HTML4(),
-    geometry=lambda x, y: dumps(x.zgeo_geometry),
+    geometry=getGeometry,
     timePeriods=getTimePeriods
     )
 
