@@ -6,6 +6,8 @@ import datetime
 import logging
 import sys
 
+from simplejson import dumps
+
 from Products.CMFCore.utils import getToolByName
 
 log = logging.getLogger('pleiades.dump')
@@ -35,10 +37,10 @@ class UnicodeWriter:
         try:
             return s.encode('utf-8')
         except:
-            return t
+            return s
         
     def writerow(self, row):
-        self.writer.writerow([s.encode("utf-8") for s in row])
+        self.writer.writerow([self._encode(s) for s in row])
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")
@@ -60,7 +62,13 @@ def location_precision(rec, catalog):
         return v[0]
     except IndexError:
         return 'unlocated'
-    
+
+def getTimePeriods(rec, catalog):
+    try:
+        return ''.join(v[0].upper() for v in rec.getTimePeriods)
+    except:
+        return ''
+
 places_schema = dict(
     id=lambda x, y: x.id,
     title=lambda x, y: x.Title,
@@ -71,8 +79,7 @@ places_schema = dict(
     created=lambda x, y: x.created.HTML4(),
     modified=lambda x, y: x.modified.HTML4(),
     featureTypes=lambda x, y: ', '.join(x.getFeatureType),
-    timePeriods=lambda x, y: ''.join(
-        v[0].upper() for v in getattr(x, 'getTimePeriods', [])),
+    timePeriods=getTimePeriods,
     locationPrecision=location_precision
     )
 
@@ -86,8 +93,7 @@ names_schema = dict(
     created=lambda x, y: x.created.HTML4(),
     modified=lambda x, y: x.modified.HTML4(),
     nameAttested=lambda x, y: x.getNameAttested or x.Title,
-    timePeriods=lambda x, y: ''.join(
-        v[0].upper() for v in getattr(x, 'getTimePeriods', [])),
+    timePeriods=getTimePeriods,
     )
 
 locations_schema = dict(
@@ -99,14 +105,13 @@ locations_schema = dict(
     creators=lambda x, y: ', '.join(x.listCreators),
     created=lambda x, y: x.created.HTML4(),
     modified=lambda x, y: x.modified.HTML4(),
-    geometry=lambda x, y: x.getNameAttested or x.Title,
-    timePeriods=lambda x, y: ''.join(
-        v[0].upper() for v in getattr(x, 'getTimePeriods', [])),
+    geometry=lambda x, y: dumps(x.zgeo_geometry),
+    timePeriods=getTimePeriods
     )
 
 def dump_catalog(context, portal_type, schema):
     catalog = getToolByName(context, 'portal_catalog')
-    results = catalog(portal_type=portal_type)
+    results = catalog(portal_type=portal_type, )
     writer = UnicodeWriter(sys.stdout)
     keys = sorted(schema.keys())
     writer.writerow(keys)
