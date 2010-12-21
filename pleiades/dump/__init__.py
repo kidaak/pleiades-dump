@@ -8,6 +8,7 @@ import sys
 
 from simplejson import dumps
 
+from AccessControl.SecurityManagement import newSecurityManager
 from Products.CMFCore.utils import getToolByName
 
 log = logging.getLogger('pleiades.dump')
@@ -72,7 +73,7 @@ def getTimePeriods(rec, catalog):
 def getGeometry(rec, catalog):
     geo = None
     try:
-        geo = rec.zgeo_geometry.copy()
+        geo = dict(rec.zgeo_geometry.items())
         geo['relation'] = location_precision(rec, catalog)
     except:
         log.warn("Unlocated: %s" % rec.getPath())
@@ -118,12 +119,23 @@ locations_schema = dict(
     timePeriods=getTimePeriods
     )
 
-def dump_catalog(context, portal_type, schema):
+def dump_catalog(context, portal_type, schema, **extras):
     catalog = getToolByName(context, 'portal_catalog')
-    results = catalog(portal_type=portal_type, )
+    if 'collection_path' in extras:
+        collection = catalog(
+            path={'query': extras['collection_path'], 'depth': 0}
+            )[0].getObject()
+        results = collection.queryCatalog()
+    else:
+        results = catalog(portal_type=portal_type, **extras)
     writer = UnicodeWriter(sys.stdout)
     keys = sorted(schema.keys())
     writer.writerow(keys)
     for b in results:
         writer.writerow([schema[k](b, catalog) for k in keys])
+
+def secure(context, username):
+    membership = getToolByName(context, 'portal_membership')
+    user=membership.getMemberById(username).getUser()
+    newSecurityManager(None, user)
 
