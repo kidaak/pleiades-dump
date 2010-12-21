@@ -125,7 +125,11 @@ def dump_catalog(context, portal_type, schema, **extras):
         collection = catalog(
             path={'query': extras['collection_path'], 'depth': 0}
             )[0].getObject()
-        results = collection.queryCatalog()
+        targets = collection.queryCatalog()
+        results = []
+        for target in targets:
+            results += catalog(
+                path=target.getPath(), portal_type=portal_type, **extras)
     else:
         results = catalog(portal_type=portal_type, **extras)
     writer = UnicodeWriter(sys.stdout)
