@@ -1,0 +1,24 @@
+#! /bin/sh
+
+# pleiades-dumps
+
+# set -e
+
+PLEIADES_HOME=/home/zope/pleiades/p3-beta
+DEST=/var/www/atlantides.org/downloads/pleiades/dumps/
+DATE=`date +%Y%m%d`
+
+# Run sitemapping script as zope user
+cd $PLEIADES_HOME
+. ./setenv
+su zope -c "./bin/debug-instance run eggs/pleiades.dump-0.4-py2.4.egg/pleiades/dump/places.py > $DEST/pleiades-places-$DATE.csv"
+su zope -c "./bin/debug-instance run eggs/pleiades.dump-0.4-py2.4.egg/pleiades/dump/names.py > $DEST/pleiades-names-$DATE.csv"
+su zope -c "./bin/debug-instance run eggs/pleiades.dump-0.4-py2.4.egg/pleiades/dump/locations.py > $DEST/pleiades-locations-$DATE.csv"
+
+# GZIP
+cd $DEST
+find $DEST -mtime +7 -exec rm -f {} \;
+gzip *.csv
+chown www-data.www-data pleiades*.gz
+chmod 644 pleiades*.gz
+
