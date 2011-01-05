@@ -95,6 +95,7 @@ places_schema = dict(
 
 names_schema = dict(
     id=lambda x, y: x.id,
+    pid=lambda x, y: x.getPath().split('/')[3],
     title=lambda x, y: x.Title,
     description=lambda x, y: x.Description,
     uid=lambda x, y: x.UID,
@@ -108,6 +109,7 @@ names_schema = dict(
 
 locations_schema = dict(
     id=lambda x, y: x.id,
+    pid=lambda x, y: x.getPath().split('/')[3],
     title=lambda x, y: x.Title,
     description=lambda x, y: x.Description,
     uid=lambda x, y: x.UID,
@@ -131,7 +133,10 @@ def dump_catalog(context, portal_type, schema, **extras):
             results += catalog(
                 path=target.getPath(), portal_type=portal_type, **extras)
     else:
-        results = catalog(portal_type=portal_type, **extras)
+        results = catalog(
+            portal_type=portal_type,
+            path={'query': '/plone/places', 'depth': 2},
+            **extras)
     writer = UnicodeWriter(sys.stdout)
     keys = sorted(schema.keys())
     writer.writerow(keys)
