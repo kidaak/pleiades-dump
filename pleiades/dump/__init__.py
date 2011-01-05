@@ -122,6 +122,11 @@ locations_schema = dict(
     )
 
 def dump_catalog(context, portal_type, schema, **extras):
+    include_features = False
+    kwextras = extras.copy()
+    if 'include_features' in kwextras:
+        include_features = True
+        del kwextras['include_features']
     catalog = getToolByName(context, 'portal_catalog')
     if 'collection_path' in extras:
         collection = catalog(
@@ -131,12 +136,13 @@ def dump_catalog(context, portal_type, schema, **extras):
         results = []
         for target in targets:
             results += catalog(
-                path=target.getPath(), portal_type=portal_type, **extras)
+                path=target.getPath(), portal_type=portal_type, **kwextras)
     else:
-        results = catalog(
-            portal_type=portal_type,
-            path={'query': '/plone/places', 'depth': 2},
-            **extras)
+        query = {'portal_type': portal_type}
+        if not include_features:
+            query.update(path={'query': '/plone/places', 'depth': 2})
+        query.update(kwextras)
+        results = catalog(query)
     writer = UnicodeWriter(sys.stdout)
     keys = sorted(schema.keys())
     writer.writerow(keys)

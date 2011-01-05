@@ -15,6 +15,9 @@ if __name__ == '__main__':
     parser.add_option(
         "-u", "--user", dest="user",
         help="Run script as user")
+    parser.add_option(
+        "-x", "--include-features", dest="include_features", default=False,
+        action="store_true", help="Run script as user")
 
     opts, args = parser.parse_args(sys.argv[1:])
 
@@ -27,6 +30,8 @@ if __name__ == '__main__':
 
     if opts.collection_path:
         kw.update(collection_path=opts.collection_path)
+    if opts.include_features:
+        kw.update(include_features=opts.include_features)
 
     site = app['plone']
     secure(site, opts.user or 'admin')
