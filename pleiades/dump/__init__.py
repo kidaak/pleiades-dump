@@ -121,7 +121,13 @@ locations_schema = dict(
     timePeriods=getTimePeriods
     )
 
-def dump_catalog(context, portal_type, schema, **extras):
+def getFeaturePID(b, catalog):
+    feature = b.getObject()
+    place = feature.getPlaces()[0]
+    return place.id
+
+def dump_catalog(context, portal_type, cschema, **extras):
+    schema = cschema.copy()
     include_features = False
     kwextras = extras.copy()
     if 'include_features' in kwextras:
@@ -146,6 +152,8 @@ def dump_catalog(context, portal_type, schema, **extras):
     writer = UnicodeWriter(sys.stdout)
     keys = sorted(schema.keys())
     writer.writerow(keys)
+    if include_features:
+        schema['pid'] = getFeaturePID
     for b in results:
         writer.writerow([schema[k](b, catalog) for k in keys])
 
