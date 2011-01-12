@@ -18,7 +18,8 @@ timePeriods = {
     'C': (-550, -330),
     'H': (-330, -30),
     'R': (30, 300),
-    'L': (300, 640)
+    'L': (300, 640),
+    'M': (1700, 2100)
     }
 
 class UnicodeWriter:
@@ -122,9 +123,15 @@ locations_schema = dict(
     )
 
 def getFeaturePID(b, catalog):
+    container =  b.getPath().split('/')[2]
+    if container == 'places':
+        return b.getPath().split('/')[3]
     feature = b.getObject()
-    place = feature.getPlaces()[0]
-    return place.id
+    places = feature.getPlaces()
+    if places:
+        return places[0].id
+    else:
+        return '-1'
 
 def dump_catalog(context, portal_type, cschema, **extras):
     schema = cschema.copy()
