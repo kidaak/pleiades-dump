@@ -14,12 +14,15 @@ from Products.CMFCore.utils import getToolByName
 log = logging.getLogger('pleiades.dump')
 
 timePeriods = {
-    'A': (-1000, -550),
-    'C': (-550, -330),
-    'H': (-330, -30),
-    'R': (30, 300),
-    'L': (300, 640),
-    'M': (1700, 2100)
+    "early-geometric": (-900, -850),
+    "middle-geometric": (-850, -750),
+    "archaic": (-750, -550),
+    "classical": (-550, -330),
+    "hellenistic-republican": (-330, -30),
+    "roman": (30, 300),
+    "late-antique": (300, 640),
+    "mediaeval-byzantine": (641, 1453),
+    "modern": (1700, 2100)
     }
 
 class UnicodeWriter:
@@ -66,10 +69,26 @@ def location_precision(rec, catalog):
         return 'unlocated'
 
 def getTimePeriods(rec, catalog):
+    periods = ["archaic"] #getattr(rec, 'getTimePeriods', None)
     try:
-        return ''.join(v[0].upper() for v in rec.getTimePeriods)
+        return ''.join(v[0].upper() for v in periods)
     except:
         return ''
+
+def getTimePeriodsKeys(rec, catalog):
+    periods = ["archaic"] #getattr(rec, 'getTimePeriods', None)
+    try:
+        return ','.join(v for v in periods)
+    except:
+        return ''
+
+def getDates(rec, catalog):
+    periods = ["archaic"] #getattr(rec, 'getTimePeriods', None)
+    if periods:
+        f, t = zip(*[timePeriods[v] for v in periods])
+        return "%d,%d" % (min(f), max(t))
+    else:
+        return None
 
 def getGeometry(rec, catalog):
     geo = None
@@ -91,6 +110,8 @@ places_schema = dict(
     modified=lambda x, y: x.modified.HTML4(),
     featureTypes=lambda x, y: ', '.join(x.getFeatureType),
     timePeriods=getTimePeriods,
+    timePeriodsKeys=getTimePeriodsKeys,
+    timePeriodsRange=getDates,
     locationPrecision=location_precision
     )
 
@@ -104,8 +125,12 @@ names_schema = dict(
     creators=lambda x, y: ', '.join(x.listCreators),
     created=lambda x, y: x.created.HTML4(),
     modified=lambda x, y: x.modified.HTML4(),
-    nameAttested=lambda x, y: x.getNameAttested or x.Title,
+    nameAttested=lambda x, y: x.getNameAttested or None,
+    nameLanguage=lambda x, y: x.getNameLanguage,
+    nameTransliterated=lambda x, y: x.Title,
     timePeriods=getTimePeriods,
+    timePeriodsKeys=getTimePeriodsKeys,
+    timePeriodsRange=getDates,
     )
 
 locations_schema = dict(
@@ -119,7 +144,9 @@ locations_schema = dict(
     created=lambda x, y: x.created.HTML4(),
     modified=lambda x, y: x.modified.HTML4(),
     geometry=getGeometry,
-    timePeriods=getTimePeriods
+    timePeriods=getTimePeriods,
+    timePeriodsKeys=getTimePeriodsKeys,
+    timePeriodsRange=getDates,
     )
 
 def getFeaturePID(b, catalog):
