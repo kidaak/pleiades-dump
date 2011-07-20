@@ -189,7 +189,7 @@ def dump_catalog(context, portal_type, cschema, **extras):
     if include_features:
         schema['pid'] = getFeaturePID
     for b in results:
-        writer.writerow([schema[k](b, catalog) for k in keys])
+        writer.writerow([schema[k](b, catalog) or "" for k in keys])
 
 def secure(context, username):
     membership = getToolByName(context, 'portal_membership')
