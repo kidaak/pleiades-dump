@@ -1,8 +1,7 @@
 Changelog
 =========
 
-0.1 - Unreleased
+0.6 (2011-09-05)
 ----------------
-
-* Initial release
+- Add representative point coords to all tables.
 

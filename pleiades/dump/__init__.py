@@ -7,9 +7,11 @@ import logging
 import sys
 
 from simplejson import dumps
-
 from AccessControl.SecurityManagement import newSecurityManager
 from Products.CMFCore.utils import getToolByName
+
+from pleiades.geographer.geo import zgeo_geometry_centroid
+from Products.PleiadesEntity.time import periodRanges
 
 log = logging.getLogger('pleiades.dump')
 
@@ -69,14 +71,14 @@ def location_precision(rec, catalog):
         return 'unlocated'
 
 def getTimePeriods(rec, catalog):
-    periods = ["archaic"] #getattr(rec, 'getTimePeriods', None)
+    periods = getattr(rec, 'getTimePeriods', None)
     try:
         return ''.join(v[0].upper() for v in periods)
     except:
         return ''
 
 def getTimePeriodsKeys(rec, catalog):
-    periods = ["archaic"] #getattr(rec, 'getTimePeriods', None)
+    periods = getattr(rec, 'getTimePeriods', None)
     try:
         return ','.join(v for v in periods)
     except:
@@ -90,6 +92,21 @@ def getDates(rec, catalog):
     else:
         return None
 
+def getDates2(rec, catalog):
+    """Nominal temporal range, not accounting for level of confidence"""
+    vocab = getToolByName(
+        catalog, 'portal_vocabularies'
+        ).getVocabularyByName('time-periods').getTarget()
+    ranges = periodRanges(vocab)
+    years = []
+    for tp in getattr(rec, 'getTimePeriods', []):
+        if tp:
+            years.extend(list(ranges[tp]))
+    if len(years) >= 2:
+        return "%.1f,%.1f" % (min(years), max(years))
+    else:
+        return None
+
 def getGeometry(rec, catalog):
     geo = None
     try:
@@ -98,6 +115,12 @@ def getGeometry(rec, catalog):
     except:
         log.warn("Unlocated: %s" % rec.getPath())
     return dumps(geo)
+
+def getReprPoint(rec, catalog):
+    try:
+        return "%f,%f" % zgeo_geometry_centroid(rec)
+    except:
+        log.warn("Unlocated: %s" % rec.getPath())
 
 places_schema = dict(
     id=lambda x, y: x.id,
@@ -111,8 +134,9 @@ places_schema = dict(
     featureTypes=lambda x, y: ', '.join(x.getFeatureType),
     timePeriods=getTimePeriods,
     timePeriodsKeys=getTimePeriodsKeys,
-    timePeriodsRange=getDates,
-    locationPrecision=location_precision
+    timePeriodsRange=getDates2,
+    locationPrecision=location_precision,
+    reprPoint=getReprPoint,
     )
 
 names_schema = dict(
@@ -130,7 +154,9 @@ names_schema = dict(
     nameTransliterated=lambda x, y: x.Title,
     timePeriods=getTimePeriods,
     timePeriodsKeys=getTimePeriodsKeys,
-    timePeriodsRange=getDates,
+    timePeriodsRange=getDates2,
+    locationPrecision=location_precision,
+    reprPoint=getReprPoint,
     )
 
 locations_schema = dict(
@@ -146,7 +172,9 @@ locations_schema = dict(
     geometry=getGeometry,
     timePeriods=getTimePeriods,
     timePeriodsKeys=getTimePeriodsKeys,
-    timePeriodsRange=getDates,
+    timePeriodsRange=getDates2,
+    locationPrecision=location_precision,
+    reprPoint=getReprPoint,
     )
 
 def getFeaturePID(b, catalog):
