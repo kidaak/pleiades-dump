@@ -116,9 +116,10 @@ def getGeometry(rec, catalog):
         log.warn("Unlocated: %s" % rec.getPath())
     return dumps(geo)
 
-def getReprPoint(rec, catalog):
+def getReprLatLong(rec, catalog):
     try:
-        return "%f,%f" % zgeo_geometry_centroid(rec)
+        lon, lat = zgeo_geometry_centroid(rec)
+        return "%f,%f" % (lat, lon)
     except:
         log.warn("Unlocated: %s" % rec.getPath())
 
@@ -136,7 +137,7 @@ places_schema = dict(
     timePeriodsKeys=getTimePeriodsKeys,
     timePeriodsRange=getDates2,
     locationPrecision=location_precision,
-    reprPoint=getReprPoint,
+    reprLatLong=getReprLatLong,
     )
 
 names_schema = dict(
@@ -156,7 +157,7 @@ names_schema = dict(
     timePeriodsKeys=getTimePeriodsKeys,
     timePeriodsRange=getDates2,
     locationPrecision=location_precision,
-    reprPoint=getReprPoint,
+    reprLatLong=getReprLatLong,
     )
 
 locations_schema = dict(
@@ -174,7 +175,7 @@ locations_schema = dict(
     timePeriodsKeys=getTimePeriodsKeys,
     timePeriodsRange=getDates2,
     locationPrecision=location_precision,
-    reprPoint=getReprPoint,
+    reprLatLong=getReprLatLong,
     )
 
 def getFeaturePID(b, catalog):
