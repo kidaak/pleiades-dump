@@ -116,13 +116,6 @@ def getGeometry(rec, catalog):
         log.warn("Unlocated: %s" % rec.getPath())
     return dumps(geo)
 
-def getReprLatLong(rec, catalog):
-    try:
-        lon, lat = zgeo_geometry_centroid(rec)
-        return "%f,%f" % (lat, lon)
-    except:
-        log.warn("Unlocated: %s" % rec.getPath())
-
 places_schema = dict(
     id=lambda x, y: x.id,
     title=lambda x, y: x.Title,
@@ -135,9 +128,13 @@ places_schema = dict(
     featureTypes=lambda x, y: ', '.join(x.getFeatureType),
     timePeriods=getTimePeriods,
     timePeriodsKeys=getTimePeriodsKeys,
-    timePeriodsRange=getDates2,
+    timePeriodsRange=lambda x, y: None,
+    minDate=lambda x, y: None,
+    maxDate=lambda x, y: None,
     locationPrecision=location_precision,
-    reprLatLong=getReprLatLong,
+    reprLatLong=lambda x, y: None,
+    reprLat=lambda x, y: None,
+    reprLong=lambda x, y: None,
     )
 
 names_schema = dict(
@@ -155,9 +152,13 @@ names_schema = dict(
     nameTransliterated=lambda x, y: x.Title,
     timePeriods=getTimePeriods,
     timePeriodsKeys=getTimePeriodsKeys,
-    timePeriodsRange=getDates2,
+    timePeriodsRange=lambda x, y: None,
+    minDate=lambda x, y: None,
+    maxDate=lambda x, y: None,
     locationPrecision=location_precision,
-    reprLatLong=getReprLatLong,
+    reprLatLong=lambda x, y: None,
+    reprLat=lambda x, y: None,
+    reprLong=lambda x, y: None,
     )
 
 locations_schema = dict(
@@ -173,9 +174,13 @@ locations_schema = dict(
     geometry=getGeometry,
     timePeriods=getTimePeriods,
     timePeriodsKeys=getTimePeriodsKeys,
-    timePeriodsRange=getDates2,
+    timePeriodsRange=lambda x, y: None,
+    minDate=lambda x, y: None,
+    maxDate=lambda x, y: None,
     locationPrecision=location_precision,
-    reprLatLong=getReprLatLong,
+    reprLatLong=lambda x, y: None,
+    reprLat=lambda x, y: None,
+    reprLong=lambda x, y: None,
     )
 
 def getFeaturePID(b, catalog):
@@ -191,6 +196,11 @@ def getFeaturePID(b, catalog):
 
 def dump_catalog(context, portal_type, cschema, **extras):
     schema = cschema.copy()
+    
+    vocabs = getToolByName(context, 'portal_vocabularies')
+    tp_vocab = vocabs.getVocabularyByName('time-periods').getTarget()
+    tp_ranges = periodRanges(tp_vocab)
+
     include_features = False
     kwextras = extras.copy()
     if 'include_features' in kwextras:
@@ -218,6 +228,27 @@ def dump_catalog(context, portal_type, cschema, **extras):
     if include_features:
         schema['pid'] = getFeaturePID
     for b in results:
+
+        # representative point
+        try:
+            lon, lat = zgeo_geometry_centroid(b)
+            schema['reprLat'] = lambda a, b: str(lat)
+            schema['reprLong'] = lambda a, b: str(lon)
+            schema['reprLatLong'] = lambda a, b: "%f,%f" % (lat, lon)
+        except:
+            log.warn("Unlocated: %s" % b.getPath())
+
+        # dates
+        years = []
+        for tp in getattr(b, 'getTimePeriods', []):
+            if tp:
+                years.extend(list(tp_ranges[tp]))
+        if len(years) >= 2:
+            dmin, dmax = min(years), max(years)
+            schema['minDate'] = lambda a, b: str(dmin)
+            schema['maxDate'] = lambda a, b: str(dmax)
+            schema['timePeriodsRange'] = lambda a, b: "%.1f,%.1f" % (dmin, dmax)
+
         writer.writerow([schema[k](b, catalog) or "" for k in keys])
 
 def secure(context, username):
