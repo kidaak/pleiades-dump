@@ -4,6 +4,7 @@ import cStringIO
 import csv
 import datetime
 import logging
+import re
 import sys
 
 from simplejson import dumps
@@ -116,10 +117,25 @@ def getGeometry(rec, catalog):
         log.warn("Unlocated: %s" % rec.getPath())
     return dumps(geo)
 
+def geoContext(rec, catalog):
+    note = rec.getModernLocation
+    if not note:
+        note = rec.Description or ""
+        match = re.search(r"cited: BAtlas (\d+) (\w+)", note)
+        if match:
+            note = "Barrington Atlas grid %s %s" % (
+                match.group(1), match.group(2).capitalize())
+        else:
+            note = ""
+        note = unicode(note.replace(unichr(174), unichr(0x2194)))
+        note = note.replace(unichr(0x2192), unichr(0x2194))
+    return note
+
 places_schema = dict(
     id=lambda x, y: x.id,
     title=lambda x, y: x.Title,
     description=lambda x, y: x.Description,
+    geoContext=geoContext,
     uid=lambda x, y: x.UID,
     path=lambda x, y: x.getPath().replace('/plone', ''),
     creators=lambda x, y: ', '.join(x.listCreators),
