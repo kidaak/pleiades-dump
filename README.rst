@@ -71,6 +71,9 @@ reprLong: numeric
   Longitude in decimal degrees E of Greenwich of the object's representative 
   point.
 
+tags: string
+  Comma-separated list of object tags.
+
 title: string
   Dublin Core title of the location resource
 
