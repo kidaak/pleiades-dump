@@ -131,17 +131,15 @@ def geoContext(rec, catalog):
         note = note.replace(unichr(0x2192), unichr(0x2194))
     return note
 
-places_schema = dict(
+common_schema = dict(
     id=lambda x, y: x.id,
     title=lambda x, y: x.Title,
     description=lambda x, y: x.Description,
-    geoContext=geoContext,
     uid=lambda x, y: x.UID,
     path=lambda x, y: x.getPath().replace('/plone', ''),
     creators=lambda x, y: ', '.join(x.listCreators),
     created=lambda x, y: x.created.HTML4(),
     modified=lambda x, y: x.modified.HTML4(),
-    featureTypes=lambda x, y: ', '.join(x.getFeatureType),
     timePeriods=getTimePeriods,
     timePeriodsKeys=getTimePeriodsKeys,
     timePeriodsRange=lambda x, y: None,
@@ -151,52 +149,28 @@ places_schema = dict(
     reprLatLong=lambda x, y: None,
     reprLat=lambda x, y: None,
     reprLong=lambda x, y: None,
+    tags=lambda x, y: ", ".join(x.Subject),
     )
 
-names_schema = dict(
-    id=lambda x, y: x.id,
+locations_schema = common_schema.copy()
+locations_schema.update(
     pid=lambda x, y: x.getPath().split('/')[3],
-    title=lambda x, y: x.Title,
-    description=lambda x, y: x.Description,
-    uid=lambda x, y: x.UID,
-    path=lambda x, y: x.getPath().replace('/plone', ''),
-    creators=lambda x, y: ', '.join(x.listCreators),
-    created=lambda x, y: x.created.HTML4(),
-    modified=lambda x, y: x.modified.HTML4(),
+    geometry=getGeometry,
+    featureTypes=lambda x, y: ', '.join(x.getFeatureType),
+    )
+
+names_schema = common_schema.copy()
+names_schema.update(
+    pid=lambda x, y: x.getPath().split('/')[3],
     nameAttested=lambda x, y: x.getNameAttested or None,
     nameLanguage=lambda x, y: x.getNameLanguage,
     nameTransliterated=lambda x, y: x.Title,
-    timePeriods=getTimePeriods,
-    timePeriodsKeys=getTimePeriodsKeys,
-    timePeriodsRange=lambda x, y: None,
-    minDate=lambda x, y: None,
-    maxDate=lambda x, y: None,
-    locationPrecision=location_precision,
-    reprLatLong=lambda x, y: None,
-    reprLat=lambda x, y: None,
-    reprLong=lambda x, y: None,
     )
 
-locations_schema = dict(
-    id=lambda x, y: x.id,
-    pid=lambda x, y: x.getPath().split('/')[3],
-    title=lambda x, y: x.Title,
-    description=lambda x, y: x.Description,
-    uid=lambda x, y: x.UID,
-    path=lambda x, y: x.getPath().replace('/plone', ''),
-    creators=lambda x, y: ', '.join(x.listCreators),
-    created=lambda x, y: x.created.HTML4(),
-    modified=lambda x, y: x.modified.HTML4(),
-    geometry=getGeometry,
-    timePeriods=getTimePeriods,
-    timePeriodsKeys=getTimePeriodsKeys,
-    timePeriodsRange=lambda x, y: None,
-    minDate=lambda x, y: None,
-    maxDate=lambda x, y: None,
-    locationPrecision=location_precision,
-    reprLatLong=lambda x, y: None,
-    reprLat=lambda x, y: None,
-    reprLong=lambda x, y: None,
+places_schema = common_schema.copy()
+places_schema.update(
+    featureTypes=lambda x, y: ', '.join(x.getFeatureType),
+    geoContext=geoContext,
     )
 
 def getFeaturePID(b, catalog):

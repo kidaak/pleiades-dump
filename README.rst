@@ -15,6 +15,11 @@ object at ``/places``. Location and name records contain both their own short
 names (``id``) and the short name of their parent place (``pid``). This allows
 the tables to be joined.
 
+Downloads
+=========
+
+CSV files are available from http://atlantides.org/downloads/pleiades/dumps/.
+
 Data Description
 ================
 
