@@ -6,7 +6,7 @@ version = '0.8'
 setup(name='pleiades.dump',
       version=version,
       description="Tabular dumps of Pleiades resource information",
-      long_description=open("README.txt").read() + "\n" +
+      long_description=open("README.rst").read() + "\n" +
                        open(os.path.join("docs", "HISTORY.txt")).read(),
       # Get more strings from http://www.python.org/pypi?%3Aaction=list_classifiers
       classifiers=[
