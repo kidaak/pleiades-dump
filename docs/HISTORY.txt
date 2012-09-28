@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.8 (2012-09-28)
+----------------
+- New and improved readme with data descriptions.
+
 0.7 (2011-09-07)
 ----------------
 - New fields for latitude, longitude, minimum date, maximum date

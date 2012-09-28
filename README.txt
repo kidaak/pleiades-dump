@@ -1,4 +1,131 @@
+===================
+Pleiades Data Dumps
+===================
+
 Introduction
 ============
 
+Data about the locations, names, and places of Pleiades is regularly written to
+CSV format files. The descriptions of the records in these files and the code
+that writes them is contained in this package.
+
+Every object in Pleiades has a short name within the context of its container.
+For places, these short names are typically numeric and their container is the
+object at ``/places``. Location and name records contain both their own short
+names (``id``) and the short name of their parent place (``pid``). This allows
+the tables to be joined.
+
+Data Description
+================
+
+Locations, names, and places are dumped to separate files. All files are UTF-8
+encocded. The first row contains column names.
+
+Common columns
+--------------
+
+The following columns shared by all three tables:
+
+created: string
+  Dublin Core creation date of the resource in RFC 3339 format
+
+creators: string
+  Dublin Core creators of the resource
+
+description: string
+  Dublin Core description of the location resource
+
+id: string
+  Unique identifier for a location in the context of a place
+
+location_precision: string
+  If 'precise', the representative point is an attested location, if 'rough'
+  it is the centroid of a bounding box.
+
+maxDate: numeric
+  The maximum date (decimal CE year) of any attested time period.
+
+minDate: numeric
+  The minimum date (decimal CE year) of any attested time period.
+
+modified: string
+  Dublin Core modification date of the resource in RFC 3339 format
+
+path: string
+  When appended to "http://pleiades.stoa.org/" forms the resource's URL
+
+reprLat: numeric
+  Latitude in decimal degrees N of the equator of the object's representative 
+  point.
+
+reprLatLong: string
+  Comma separated decimal latitude,longitude for a representative point. The
+  individual values are also provided in reprLat and reprLong columns.
+
+reprLong: numeric
+  Longitude in decimal degrees E of Greenwich of the object's representative 
+  point.
+
+title: string
+  Dublin Core title of the location resource
+
+timePeriods: string
+  One or more of 'A' (1000-550 BC), 'C' (550-330 BC), 'H' (330-30 BC), 
+  'R' (AD 30-300), 'L' (AD 300-640)
+
+timePeriodsKeys: string
+  Comma-separated sequence of time periods keys such as "archaic,classical".
+  These keys maybe be concatenated with the string 
+  "http://pleiades.stoa.org/vocabularies/time-periods/" to produce resolvable
+  Pleiades URIs.
+
+timePeriodsRange: string
+  Comma separated numeric values a,b where a is the minimum year of any
+  attested time period (see minDate) and b is the maximum year of any attested
+  time period (see maxDate).
+
+uid: string
+  Framework UID of resource for project use
+
+Location Columns
+----------------
+
+Location tables have additional columns:
+
+geometry: string
+  Geometry and coordinates in GeoJSON format
+
+featureTypes: string
+  Comma-separated list of feature types such as "settlement, temple"
+
+pid: string
+  Unique identifier for the place container within the site
+
+Name Columns
+------------
+
+Name tables have additional columns:
+
+nameAttested: string
+  Attested spelling of ancient name, not necessarily the same as the "title"
+
+nameLanguage: string
+  Short identifier for language and writing system associated with the 
+  attested spelling. See 
+  http://pleiades.stoa.org/vocabularies/ancient-name-languages.
+
+nameTransliterated: string
+  Transliteration of the attested name to Roman characters following the
+  Classical Atlas Project scheme.
+
+pid: string
+  Unique identifier for the place container within the site
+
+Place Columns
+-------------
+
+Place tables have additional columns:
+
+featureTypes: string
+  Comma-separated list of feature types such as "settlement, temple"
 
