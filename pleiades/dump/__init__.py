@@ -64,10 +64,8 @@ class UnicodeWriter:
             self.writerow(row)
 
 def location_precision(rec, catalog):
-    v = catalog._catalog.getIndex('location_precision').getEntryForObject(
-        rec.getRID(), default=['unlocated'])
     try:
-        return v[0]
+        return rec.reprPt[1]
     except IndexError:
         return 'unlocated'
 
@@ -112,7 +110,7 @@ def getGeometry(rec, catalog):
     geo = None
     try:
         geo = dict(rec.zgeo_geometry.items())
-        geo['relation'] = location_precision(rec, catalog)
+        geo['precision'] = location_precision(rec, catalog)
     except:
         log.warn("Unlocated: %s" % rec.getPath())
     return dumps(geo)
@@ -149,6 +147,7 @@ common_schema = dict(
     reprLatLong=lambda x, y: None,
     reprLat=lambda x, y: None,
     reprLong=lambda x, y: None,
+    bbox=lambda x, y: x.bbox,
     tags=lambda x, y: ", ".join(x.Subject),
     )
 
@@ -221,7 +220,7 @@ def dump_catalog(context, portal_type, cschema, **extras):
 
         # representative point
         try:
-            lon, lat = zgeo_geometry_centroid(b)
+            lon, lat = b.reprPt[0]
             schema['reprLat'] = lambda a, b: str(lat)
             schema['reprLong'] = lambda a, b: str(lon)
             schema['reprLatLong'] = lambda a, b: "%f,%f" % (lat, lon)
