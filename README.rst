@@ -31,6 +31,10 @@ Common columns
 
 The following columns shared by all three tables:
 
+bbox: numeric
+  The geographic bounding box of the resource: minimum longitude, minimum 
+  latitude, maximum longitude, maximum latitude.
+
 created: string
   Dublin Core creation date of the resource in RFC 3339 format
 
@@ -43,7 +47,7 @@ description: string
 id: string
   Unique identifier for a location in the context of a place
 
-location_precision: string
+locationPrecision: string
   If 'precise', the representative point is an attested location, if 'rough'
   it is the centroid of a bounding box.
 
@@ -100,11 +104,18 @@ Location Columns
 
 Location tables have additional columns:
 
+avgRating: numeric
+  The average of all user ratings of the significance of this location relative
+  to its peers.
+
 geometry: string
   Geometry and coordinates in GeoJSON format
 
 featureTypes: string
   Comma-separated list of feature types such as "settlement, temple"
+
+numRatings: numeric
+  The number of user ratings (see also 'avgRating' above).
 
 pid: string
   Unique identifier for the place container within the site
@@ -113,6 +124,10 @@ Name Columns
 ------------
 
 Name tables have additional columns:
+
+avgRating: numeric
+  The average of all user ratings of the significance of this name relative
+  to its peers.
 
 nameAttested: string
   Attested spelling of ancient name, not necessarily the same as the "title"
@@ -125,6 +140,9 @@ nameLanguage: string
 nameTransliterated: string
   Transliteration of the attested name to Roman characters following the
   Classical Atlas Project scheme.
+
+numRatings: numeric
+  The number of user ratings (see also 'avgRating' above).
 
 pid: string
   Unique identifier for the place container within the site

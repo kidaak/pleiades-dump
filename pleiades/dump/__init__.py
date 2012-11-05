@@ -147,7 +147,7 @@ common_schema = dict(
     reprLatLong=lambda x, y: None,
     reprLat=lambda x, y: None,
     reprLong=lambda x, y: None,
-    bbox=lambda x, y: x.bbox,
+    bbox=lambda x, y: ", ".join(map(str, x.bbox)),
     tags=lambda x, y: ", ".join(x.Subject),
     )
 
@@ -156,6 +156,8 @@ locations_schema.update(
     pid=lambda x, y: x.getPath().split('/')[3],
     geometry=getGeometry,
     featureTypes=lambda x, y: ', '.join(x.getFeatureType),
+    avgRating=lambda x, y: x.average_rating,
+    numRatings=lambda x, y: x.number_of_ratings
     )
 
 names_schema = common_schema.copy()
@@ -164,12 +166,16 @@ names_schema.update(
     nameAttested=lambda x, y: x.getNameAttested or None,
     nameLanguage=lambda x, y: x.getNameLanguage,
     nameTransliterated=lambda x, y: x.Title,
+    extent=lambda x, y: dumps(x.zgeo_geometry),
+    avgRating=lambda x, y: x.average_rating,
+    numRatings=lambda x, y: x.number_of_ratings
     )
 
 places_schema = common_schema.copy()
 places_schema.update(
     featureTypes=lambda x, y: ', '.join(x.getFeatureType),
     geoContext=geoContext,
+    extent=lambda x, y: dumps(x.zgeo_geometry)
     )
 
 def getFeaturePID(b, catalog):
@@ -221,6 +227,7 @@ def dump_catalog(context, portal_type, cschema, **extras):
         # representative point
         try:
             lon, lat = b.reprPt[0]
+            precision = b.reprPt[1]
             schema['reprLat'] = lambda a, b: str(lat)
             schema['reprLong'] = lambda a, b: str(lon)
             schema['reprLatLong'] = lambda a, b: "%f,%f" % (lat, lon)
