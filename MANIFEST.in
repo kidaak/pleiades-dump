@@ -1,3 +1,3 @@
-global-include *.txt *.csv
+global-include *.txt *.csv *.rst
 recursive-include pleiades *
 global-exclude *pyc
