@@ -31,7 +31,7 @@ added and columns may be reordered.
 .. attention::
    The order of columns is more or less arbitrary. When reading, please use a
    dictionary based reader such as Python's csv.DictReader, or convert the
-   rows immediately into key/value pairs like this (Python example):
+   rows immediately into key/value pairs like this (Python example)::
 
      # rows is a sequence of lines from the CSV file.
      header = rows[0]
