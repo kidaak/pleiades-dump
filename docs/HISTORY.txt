@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.9.1 (2012-11-08)
+------------------
+- Fix for bbox and rating columns, more format documentation.
+
 0.9 (2012-11-05)
 ----------------
 - Bounding box, extent, ratings added to dumps.

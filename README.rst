@@ -24,7 +24,18 @@ Data Description
 ================
 
 Locations, names, and places are dumped to separate files. All files are UTF-8
-encocded. The first row contains column names.
+encocded. The first row contains column names. Columns will not be removed or
+reformatted in future revisions of the dump files, but new columns may be
+added and columns may be reordered.
+
+.. attention::
+   The order of columns is more or less arbitrary. When reading, please use a
+   dictionary based reader such as Python's csv.DictReader, or convert the
+   rows immediately into key/value pairs like this (Python example):
+
+     # rows is a sequence of lines from the CSV file.
+     header = rows[0]
+     records = list( dict(zip(header, row)) for row in rows[1:] )
 
 Common columns
 --------------

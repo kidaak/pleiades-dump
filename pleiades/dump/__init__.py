@@ -48,7 +48,7 @@ class UnicodeWriter:
             return s
         
     def writerow(self, row):
-        self.writer.writerow([self._encode(s.strip()) for s in row])
+        self.writer.writerow([self._encode(str(s).strip()) for s in row])
         # Fetch UTF-8 output from the queue ...
         data = self.queue.getvalue()
         data = data.decode("utf-8")
@@ -65,8 +65,8 @@ class UnicodeWriter:
 
 def location_precision(rec, catalog):
     try:
-        return rec.reprPt[1]
-    except IndexError:
+        return rec.reprPt[1] 
+    except:
         return 'unlocated'
 
 def getTimePeriods(rec, catalog):
@@ -106,15 +106,6 @@ def getDates2(rec, catalog):
     else:
         return None
 
-def getGeometry(rec, catalog):
-    geo = None
-    try:
-        geo = dict(rec.zgeo_geometry.items())
-        geo['precision'] = location_precision(rec, catalog)
-    except:
-        log.warn("Unlocated: %s" % rec.getPath())
-    return dumps(geo)
-
 def geoContext(rec, catalog):
     note = rec.getModernLocation
     if not note:
@@ -128,6 +119,12 @@ def geoContext(rec, catalog):
         note = unicode(note.replace(unichr(174), unichr(0x2194)))
         note = note.replace(unichr(0x2192), unichr(0x2194))
     return note
+
+def getRating(rec, catalog):
+    rid = rec.getRID()
+    # A small number of records have no metadata column, but have index data.
+    return rec.average_rating or catalog._catalog.getIndex("average_rating"
+        ).getEntryForObject(rid, default=(0.0, 0))
 
 common_schema = dict(
     id=lambda x, y: x.id,
@@ -147,17 +144,17 @@ common_schema = dict(
     reprLatLong=lambda x, y: None,
     reprLat=lambda x, y: None,
     reprLong=lambda x, y: None,
-    bbox=lambda x, y: ", ".join(map(str, x.bbox)),
+    bbox=lambda x, y: ", ".join(map(str, x.bbox or [])),
     tags=lambda x, y: ", ".join(x.Subject),
     )
 
 locations_schema = common_schema.copy()
 locations_schema.update(
     pid=lambda x, y: x.getPath().split('/')[3],
-    geometry=getGeometry,
+    geometry=lambda x, y: dumps(x.zgeo_geometry or None),
     featureTypes=lambda x, y: ', '.join(x.getFeatureType),
-    avgRating=lambda x, y: x.average_rating,
-    numRatings=lambda x, y: x.number_of_ratings
+    avgRating=lambda x, y: getRating(x, y)[0],
+    numRatings=lambda x, y: getRating(x, y)[1]
     )
 
 names_schema = common_schema.copy()
@@ -166,16 +163,16 @@ names_schema.update(
     nameAttested=lambda x, y: x.getNameAttested or None,
     nameLanguage=lambda x, y: x.getNameLanguage,
     nameTransliterated=lambda x, y: x.Title,
-    extent=lambda x, y: dumps(x.zgeo_geometry),
-    avgRating=lambda x, y: x.average_rating,
-    numRatings=lambda x, y: x.number_of_ratings
+    extent=lambda x, y: dumps(x.zgeo_geometry or None),
+    avgRating=lambda x, y: getRating(x, y)[0],
+    numRatings=lambda x, y: getRating(x, y)[1]
     )
 
 places_schema = common_schema.copy()
 places_schema.update(
     featureTypes=lambda x, y: ', '.join(x.getFeatureType),
     geoContext=geoContext,
-    extent=lambda x, y: dumps(x.zgeo_geometry)
+    extent=lambda x, y: dumps(x.zgeo_geometry or None)
     )
 
 def getFeaturePID(b, catalog):
@@ -214,7 +211,9 @@ def dump_catalog(context, portal_type, cschema, **extras):
     else:
         query = {'portal_type': portal_type}
         if not include_features:
-            query.update(path={'query': '/plone/places', 'depth': 2})
+            query.update(
+                path={'query': '/plone/places', 'depth': 2},
+                review_state='published' )
         query.update(kwextras)
         results = catalog(query)
     writer = UnicodeWriter(sys.stdout)
@@ -226,7 +225,7 @@ def dump_catalog(context, portal_type, cschema, **extras):
 
         # representative point
         try:
-            lon, lat = b.reprPt[0]
+            lon, lat = map(float, b.reprPt[0])
             precision = b.reprPt[1]
             schema['reprLat'] = lambda a, b: str(lat)
             schema['reprLong'] = lambda a, b: str(lon)
