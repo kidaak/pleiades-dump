@@ -1,6 +1,10 @@
 Changelog
 =========
 
+0.10 (2012-11-30)
+-----------------
+- Add currentVersion column to dumps.
+
 0.9.1 (2012-11-08)
 ------------------
 - Fix for bbox and rating columns, more format documentation.

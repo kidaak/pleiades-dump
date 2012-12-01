@@ -52,6 +52,9 @@ created: string
 creators: string
   Dublin Core creators of the resource
 
+currentVersion: numeric
+  The current version of the object.
+
 description: string
   Dublin Core description of the location resource
 
