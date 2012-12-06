@@ -42,6 +42,10 @@ Common columns
 
 The following columns shared by all three tables:
 
+authors: string
+  As in the suggested citation for Pleiades places: the primary creator(s)
+  followed by all contributors.
+
 bbox: numeric
   The geographic bounding box of the resource: minimum longitude, minimum 
   latitude, maximum longitude, maximum latitude.

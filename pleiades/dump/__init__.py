@@ -126,6 +126,42 @@ def getRating(rec, catalog):
     return rec.average_rating or catalog._catalog.getIndex("average_rating"
         ).getEntryForObject(rid, default=(0.0, 0))
 
+def _abbrev(a):
+    parts = [p.strip() for p in a['fullname'].split(" ", 1)]
+    if len(parts) == 2 and len(parts[0]) > 2:
+        parts[0] = parts[0][0] + "."
+    return " ".join(parts)
+    
+def _userInByline(mtool, username):
+    if username == 'T. Elliott': un = 'thomase'
+    elif username == 'S. Gillies': un = 'sgillies'
+    else: un = username
+    member = mtool.getMemberById(un)
+    if member:
+        return {
+            "id": member.getId(), 
+            "fullname": member.getProperty('fullname') }
+    else:
+        return {"id": None, "fullname": un}
+
+def getAuthors(rec, catalog):
+    """Return a listing of authors as in the Pleiades suggested citation."""
+    mtool = getToolByName(catalog, 'portal_membership')
+    creators = list(rec.listCreators)
+    contributors = catalog._catalog.getIndex("Contributors"
+        ).getEntryForObject(rec.getRID(), default=[])
+    if "sgillies" in creators and (
+        "sgillies" in contributors or "S. Gillies" in contributors):
+        creators.remove("sgillies")
+    authors = [
+        _userInByline(mtool, name) for name in (creators + contributors)]
+    authors[1:] = map(_abbrev, authors[1:])
+    parts = [p.strip() for p in authors[0]['fullname'].split(" ", 1)]
+    if len(parts) == 2 and len(parts[0]) > 2:
+        parts[0] = parts[0][0] + "."
+    authors[0] = ", ".join(parts[::-1])
+    return ", ".join(authors)
+
 common_schema = dict(
     id=lambda x, y: x.id,
     title=lambda x, y: x.Title,
@@ -147,6 +183,7 @@ common_schema = dict(
     bbox=lambda x, y: ", ".join(map(str, x.bbox or [])),
     tags=lambda x, y: ", ".join(x.Subject),
     currentVersion=lambda x, y: x.currentVersion,
+    authors=getAuthors
     )
 
 locations_schema = common_schema.copy()
