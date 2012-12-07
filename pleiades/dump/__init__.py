@@ -9,7 +9,12 @@ import sys
 
 from simplejson import dumps
 from AccessControl.SecurityManagement import newSecurityManager
+from AccessControl.SecurityManager import setSecurityPolicy
+from Products.CMFCore.tests.base.security import PermissiveSecurityPolicy
+from Products.CMFCore.tests.base.security import OmnipotentUser
 from Products.CMFCore.utils import getToolByName
+from Testing.makerequest import makerequest
+import zope
 
 from pleiades.geographer.geo import zgeo_geometry_centroid
 from Products.PleiadesEntity.time import periodRanges
@@ -288,4 +293,21 @@ def secure(context, username):
     membership = getToolByName(context, 'portal_membership')
     user=membership.getMemberById(username).getUser()
     newSecurityManager(None, user)
+
+def spoofRequest(app):
+    """
+    Make REQUEST variable to be available on the Zope application server.
+
+    This allows acquisition to work properly
+    """
+    _policy=PermissiveSecurityPolicy()
+    _oldpolicy=setSecurityPolicy(_policy)
+    newSecurityManager(None, OmnipotentUser().__of__(app.acl_users))
+    return makerequest(app)
+
+def getSite(app):
+    site = app.unrestrictedTraverse("plone")
+    site.setupCurrentSkin(app.REQUEST)
+    zope.app.component.hooks.setSite(site)
+    return site
 

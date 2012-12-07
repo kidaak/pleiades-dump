@@ -1,7 +1,7 @@
 
 from optparse import OptionParser
 
-from pleiades.dump import dump_catalog, names_schema, secure
+from pleiades.dump import dump_catalog, names_schema, getSite, spoofRequest
 
 if __name__ == '__main__':
     # names.py --extras pleiades_wsuids=
@@ -33,7 +33,8 @@ if __name__ == '__main__':
     if opts.include_features:
         kw.update(include_features=opts.include_features)
 
-    site = app['plone']
-    secure(site, opts.user or 'admin')
+    app = spoofRequest(app)
+    site = getSite(app)
+    
     dump_catalog(site, 'Name', names_schema, **kw)
 

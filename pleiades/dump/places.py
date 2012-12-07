@@ -1,7 +1,7 @@
 
 from optparse import OptionParser
 
-from pleiades.dump import dump_catalog, places_schema, secure
+from pleiades.dump import dump_catalog, places_schema, getSite, spoofRequest
 
 if __name__ == '__main__':
     # places.py --extras pleiades_wsuids=
@@ -28,7 +28,8 @@ if __name__ == '__main__':
     if opts.collection_path:
         kw.update(collection_path=opts.collection_path)
 
-    site = app['plone']
-    secure(site, opts.user or 'admin')
+    app = spoofRequest(app)
+    site = getSite(app)
+    
     dump_catalog(site, 'Place', places_schema, **kw)
 
