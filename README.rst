@@ -5,9 +5,10 @@ Pleiades Data Dumps
 Introduction
 ============
 
-Data about the locations, names, and places of Pleiades is regularly written to
-CSV format files. The descriptions of the records in these files and the code
-that writes them is contained in this package.
+Data about the locations, names, and places of Pleiades is regularly read from
+the site catalog and written to CSV format files. The descriptions of the
+records in these files and the code that writes them is contained in this
+package.
 
 Every object in Pleiades has a short name within the context of its container.
 For places, these short names are typically numeric and their container is the
@@ -170,6 +171,16 @@ Place Columns
 
 Place tables have additional columns:
 
+connectsWith: string
+  Comma-separated list of numeric pids that the place connects to. Generally,
+  this has a sense of connecting up-scale: settlements to regions, rivers to
+  seas, etc.
+
 featureTypes: string
   Comma-separated list of feature types such as "settlement, temple"
+
+hasConnectionWith: string
+  Comma-separated list of numeric pids for places that are connected to this
+  one.  Generally, this has a sense of connections from down-scale: regions
+  have connections with settlements, seas have connections with rivers.
 
