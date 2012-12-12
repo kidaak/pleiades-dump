@@ -213,11 +213,11 @@ names_schema.update(
 
 places_schema = common_schema.copy()
 places_schema.update(
-    featureTypes=lambda x, y: ', '.join(x.getFeatureType),
+    featureTypes=lambda x, y: ', '.join(x.getFeatureType or []),
     geoContext=geoContext,
     extent=lambda x, y: dumps(x.zgeo_geometry or None),
-    connectsWith=lambda x, y: x.connectsWith,
-    hasConnectionWith=lambda x, y: x.hasConnectionWith
+    connectsWith=lambda x, y: ','.join(x.connectsWith or []),
+    hasConnectionsWith=lambda x, y: ','.join(x.hasConnectionsWith or [])
     )
 
 def getFeaturePID(b, catalog):
