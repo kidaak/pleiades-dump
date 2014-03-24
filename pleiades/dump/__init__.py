@@ -188,7 +188,8 @@ common_schema = dict(
     bbox=lambda x, y: ", ".join(map(str, x.bbox or [])),
     tags=lambda x, y: ", ".join(x.Subject),
     currentVersion=lambda x, y: x.currentVersion,
-    authors=getAuthors
+    authors=getAuthors,
+    references=getReferenceCitations
     )
 
 locations_schema = common_schema.copy()
